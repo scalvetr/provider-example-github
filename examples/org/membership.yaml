@@ -7,3 +7,5 @@ spec:
     org: kubecon-na
     team: was-crossplane 
     user: stevendborrelli
+  providerConfigRef:
+    name: default

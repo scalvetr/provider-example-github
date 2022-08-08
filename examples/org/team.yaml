@@ -7,3 +7,5 @@ spec:
     org: kubecon-na
     description: "some other description"
     privacy: secret
+  providerConfigRef:
+    name: default
