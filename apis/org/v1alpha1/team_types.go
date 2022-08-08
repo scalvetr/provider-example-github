@@ -17,9 +17,11 @@ limitations under the License.
 package v1alpha1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"reflect"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // TeamParameters are the configurable fields of a Team.
@@ -74,4 +76,16 @@ type TeamList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Team `json:"items"`
+}
+
+// Team type metadata.
+var (
+	TeamKind             = reflect.TypeOf(Team{}).Name()
+	TeamGroupKind        = schema.GroupKind{Group: Group, Kind: TeamKind}.String()
+	TeamKindAPIVersion   = TeamKind + "." + SchemeGroupVersion.String()
+	TeamGroupVersionKind = SchemeGroupVersion.WithKind(TeamKind)
+)
+
+func init() {
+	SchemeBuilder.Register(&Team{}, &TeamList{})
 }

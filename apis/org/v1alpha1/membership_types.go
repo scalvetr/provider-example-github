@@ -17,9 +17,11 @@ limitations under the License.
 package v1alpha1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"reflect"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // MembershipParameters are the configurable fields of a Membership.
@@ -79,4 +81,16 @@ type MembershipList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Membership `json:"items"`
+}
+
+// Membership type metadata.
+var (
+	MembershipKind             = reflect.TypeOf(Membership{}).Name()
+	MembershipGroupKind        = schema.GroupKind{Group: Group, Kind: MembershipKind}.String()
+	MembershipKindAPIVersion   = MembershipKind + "." + SchemeGroupVersion.String()
+	MembershipGroupVersionKind = SchemeGroupVersion.WithKind(MembershipKind)
+)
+
+func init() {
+	SchemeBuilder.Register(&Membership{}, &MembershipList{})
 }

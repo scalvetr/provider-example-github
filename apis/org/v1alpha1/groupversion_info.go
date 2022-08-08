@@ -17,8 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"reflect"
-
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
@@ -36,24 +34,3 @@ var (
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 )
-
-// Team type metadata.
-var (
-	TeamKind             = reflect.TypeOf(Team{}).Name()
-	TeamGroupKind        = schema.GroupKind{Group: Group, Kind: TeamKind}.String()
-	TeamKindAPIVersion   = TeamKind + "." + SchemeGroupVersion.String()
-	TeamGroupVersionKind = SchemeGroupVersion.WithKind(TeamKind)
-)
-
-// Membership type metadata.
-var (
-	MembershipKind             = reflect.TypeOf(Membership{}).Name()
-	MembershipGroupKind        = schema.GroupKind{Group: Group, Kind: MembershipKind}.String()
-	MembershipKindAPIVersion   = MembershipKind + "." + SchemeGroupVersion.String()
-	MembershipGroupVersionKind = SchemeGroupVersion.WithKind(MembershipKind)
-)
-
-func init() {
-	SchemeBuilder.Register(&Team{}, &TeamList{})
-	SchemeBuilder.Register(&Membership{}, &MembershipList{})
-}
