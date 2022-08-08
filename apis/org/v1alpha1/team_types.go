@@ -26,20 +26,12 @@ import (
 
 // TeamParameters are the configurable fields of a Team.
 type TeamParameters struct {
-	// The name of the organization this team belongs to.
-	Org string `json:"org"`
-
-	// A description about the team.
-	Description *string `json:"description,omitempty"`
-
-	// The visibility of the team.
-	// +kubebuilder:validation:Enum=secret;closed
-	Privacy *string `json:"privacy,omitempty"`
+	// TODO
 }
 
 // TeamObservation are the observable fields of a Team.
 type TeamObservation struct {
-	NodeID string `json:"nodeId,omitempty"`
+	// TODO
 }
 
 // A TeamSpec defines the desired state of a Team.

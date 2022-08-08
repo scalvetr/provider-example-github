@@ -72,15 +72,7 @@ type connector struct {
 // 3. Getting the ProviderConfig's credentials secret.
 // 4. Using the credentials secret to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	_, ok := mg.(*v1alpha1.Team)
-	if !ok {
-		return nil, errors.New(errNotTeam)
-	}
-	svc, err := kcgitclient.UseProviderConfig(ctx, c.kube, mg)
-	if err != nil {
-		return nil, errors.Wrap(err, errCreateService)
-	}
-	return &external{service: svc}, nil
+	// TODO
 }
 
 // An ExternalClient observes, then either creates, updates, or deletes an
@@ -92,91 +84,17 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*v1alpha1.Team)
-	if !ok {
-		return managed.ExternalObservation{}, errors.New(errNotTeam)
-	}
-
-	team, _, err := c.service.Teams.GetTeamBySlug(ctx, cr.Spec.ForProvider.Org, meta.GetExternalName(cr))
-	if err != nil {
-		return managed.ExternalObservation{
-			ResourceExists: false,
-		}, nil
-	}
-
-	if team.NodeID != nil {
-		cr.Status.AtProvider.NodeID = *team.NodeID
-	}
-
-	upToDate := true
-	if team != nil {
-		if cr.Spec.ForProvider.Description != nil {
-			if team.Description == nil || *team.Description != *cr.Spec.ForProvider.Description {
-				upToDate = false
-			}
-		}
-		if cr.Spec.ForProvider.Privacy != nil {
-			if team.Privacy == nil || *team.Privacy != *cr.Spec.ForProvider.Privacy {
-				upToDate = false
-			}
-		}
-	}
-	return managed.ExternalObservation{
-		// Return false when the external resource does not exist. This lets
-		// the managed resource reconciler know that it needs to call Create to
-		// (re)create the resource, or that it has successfully been deleted.
-		ResourceExists: true,
-
-		// Return false when the external resource exists, but it not up to date
-		// with the desired managed resource state. This lets the managed
-		// resource reconciler know that it needs to call Update.
-		ResourceUpToDate: upToDate,
-	}, nil
+	// TODO
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.Team)
-	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNotTeam)
-	}
-
-	fmt.Printf("Creating: %+v", cr)
-
-	_, _, err := c.service.Teams.CreateTeam(ctx, cr.Spec.ForProvider.Org, github.NewTeam{
-		Name:        meta.GetExternalName(cr),
-		Description: cr.Spec.ForProvider.Description,
-		Privacy:     cr.Spec.ForProvider.Privacy,
-	})
-
-	return managed.ExternalCreation{}, err
+	// TODO
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.Team)
-	if !ok {
-		return managed.ExternalUpdate{}, errors.New(errNotTeam)
-	}
-
-	fmt.Printf("Updating: %+v", cr)
-
-	_, _, err := c.service.Teams.EditTeamBySlug(ctx, cr.Spec.ForProvider.Org, meta.GetExternalName(cr), github.NewTeam{
-		Name:        meta.GetExternalName(cr),
-		Description: cr.Spec.ForProvider.Description,
-		Privacy:     cr.Spec.ForProvider.Privacy,
-	}, false)
-
-	return managed.ExternalUpdate{}, err
+	// TODO
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
-	cr, ok := mg.(*v1alpha1.Team)
-	if !ok {
-		return errors.New(errNotTeam)
-	}
-
-	fmt.Printf("Deleting: %+v", cr)
-
-	_, err := c.service.Teams.DeleteTeamBySlug(ctx, cr.Spec.ForProvider.Org, meta.GetExternalName(cr))
-
-	return err
+	// TODO
 }
