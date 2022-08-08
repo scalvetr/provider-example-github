@@ -14,6 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package v1alpha1 contains the v1alpha1 group Org resources of the Template provider.
+// +kubebuilder:object:generate=true
+// +groupName=org.github.hasheddan.io
+// +versionName=v1alpha1
 package v1alpha1
 
 import (

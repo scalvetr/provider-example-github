@@ -33,6 +33,9 @@ type MembershipParameters struct {
 	User string `json:"user"`
 
 	// Team is the name of the team to which the user should be added.
+	// +crossplane:generate:reference:type=github.com/hasheddan/kc-provider-github/apis/org/v1alpha1.Team
+	// +crossplane:generate:reference:refFieldName=TeamRef
+	// +crossplane:generate:reference:selectorFieldName=TeamSelector
 	Team *string `json:"team,omitempty"`
 
 	// TeamRef referes to a Team resource.

@@ -1,11 +1,12 @@
 apiVersion: org.github.hasheddan.io/v1alpha1
 kind: Membership
 metadata:
-  name: was-crossplane
+  name: example-membership
 spec:
   forProvider:
-    org: kubecon-na
-    team: was-crossplane 
-    user: stevendborrelli
+    org: # org name
+    teamRef:
+      name: example-team
+    user: # user
   providerConfigRef:
     name: default

@@ -121,6 +121,10 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		// with the desired managed resource state. This lets the managed
 		// resource reconciler know that it needs to call Update.
 		ResourceUpToDate: true,
+
+		ConnectionDetails: managed.ConnectionDetails{
+			"username": []byte(cr.Spec.ForProvider.User),
+		},
 	}, nil
 }
 

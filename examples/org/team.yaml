@@ -1,10 +1,10 @@
 apiVersion: org.github.hasheddan.io/v1alpha1
 kind: Team
 metadata:
-  name: was-crossplane
+  name: example-team
 spec:
   forProvider:
-    org: kubecon-na
+    org: # org name
     description: "some other description"
     privacy: secret
   providerConfigRef:
