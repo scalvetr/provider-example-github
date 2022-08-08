@@ -17,20 +17,20 @@ limitations under the License.
 
 package v1alpha1
 
-import runtimev1alpha1 "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1"
+import xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 
 // GetCondition of this Membership.
-func (mg *Membership) GetCondition(ct runtimev1alpha1.ConditionType) runtimev1alpha1.Condition {
+func (mg *Membership) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
 	return mg.Status.GetCondition(ct)
 }
 
 // GetDeletionPolicy of this Membership.
-func (mg *Membership) GetDeletionPolicy() runtimev1alpha1.DeletionPolicy {
+func (mg *Membership) GetDeletionPolicy() xpv1.DeletionPolicy {
 	return mg.Spec.DeletionPolicy
 }
 
 // GetProviderConfigReference of this Membership.
-func (mg *Membership) GetProviderConfigReference() *runtimev1alpha1.Reference {
+func (mg *Membership) GetProviderConfigReference() *xpv1.Reference {
 	return mg.Spec.ProviderConfigReference
 }
 
@@ -38,27 +38,32 @@ func (mg *Membership) GetProviderConfigReference() *runtimev1alpha1.Reference {
 GetProviderReference of this Membership.
 Deprecated: Use GetProviderConfigReference.
 */
-func (mg *Membership) GetProviderReference() *runtimev1alpha1.Reference {
+func (mg *Membership) GetProviderReference() *xpv1.Reference {
 	return mg.Spec.ProviderReference
 }
 
+// GetPublishConnectionDetailsTo of this Membership.
+func (mg *Membership) GetPublishConnectionDetailsTo() *xpv1.PublishConnectionDetailsTo {
+	return mg.Spec.PublishConnectionDetailsTo
+}
+
 // GetWriteConnectionSecretToReference of this Membership.
-func (mg *Membership) GetWriteConnectionSecretToReference() *runtimev1alpha1.SecretReference {
+func (mg *Membership) GetWriteConnectionSecretToReference() *xpv1.SecretReference {
 	return mg.Spec.WriteConnectionSecretToReference
 }
 
 // SetConditions of this Membership.
-func (mg *Membership) SetConditions(c ...runtimev1alpha1.Condition) {
+func (mg *Membership) SetConditions(c ...xpv1.Condition) {
 	mg.Status.SetConditions(c...)
 }
 
 // SetDeletionPolicy of this Membership.
-func (mg *Membership) SetDeletionPolicy(r runtimev1alpha1.DeletionPolicy) {
+func (mg *Membership) SetDeletionPolicy(r xpv1.DeletionPolicy) {
 	mg.Spec.DeletionPolicy = r
 }
 
 // SetProviderConfigReference of this Membership.
-func (mg *Membership) SetProviderConfigReference(r *runtimev1alpha1.Reference) {
+func (mg *Membership) SetProviderConfigReference(r *xpv1.Reference) {
 	mg.Spec.ProviderConfigReference = r
 }
 
@@ -66,27 +71,32 @@ func (mg *Membership) SetProviderConfigReference(r *runtimev1alpha1.Reference) {
 SetProviderReference of this Membership.
 Deprecated: Use SetProviderConfigReference.
 */
-func (mg *Membership) SetProviderReference(r *runtimev1alpha1.Reference) {
+func (mg *Membership) SetProviderReference(r *xpv1.Reference) {
 	mg.Spec.ProviderReference = r
 }
 
+// SetPublishConnectionDetailsTo of this Membership.
+func (mg *Membership) SetPublishConnectionDetailsTo(r *xpv1.PublishConnectionDetailsTo) {
+	mg.Spec.PublishConnectionDetailsTo = r
+}
+
 // SetWriteConnectionSecretToReference of this Membership.
-func (mg *Membership) SetWriteConnectionSecretToReference(r *runtimev1alpha1.SecretReference) {
+func (mg *Membership) SetWriteConnectionSecretToReference(r *xpv1.SecretReference) {
 	mg.Spec.WriteConnectionSecretToReference = r
 }
 
 // GetCondition of this Team.
-func (mg *Team) GetCondition(ct runtimev1alpha1.ConditionType) runtimev1alpha1.Condition {
+func (mg *Team) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
 	return mg.Status.GetCondition(ct)
 }
 
 // GetDeletionPolicy of this Team.
-func (mg *Team) GetDeletionPolicy() runtimev1alpha1.DeletionPolicy {
+func (mg *Team) GetDeletionPolicy() xpv1.DeletionPolicy {
 	return mg.Spec.DeletionPolicy
 }
 
 // GetProviderConfigReference of this Team.
-func (mg *Team) GetProviderConfigReference() *runtimev1alpha1.Reference {
+func (mg *Team) GetProviderConfigReference() *xpv1.Reference {
 	return mg.Spec.ProviderConfigReference
 }
 
@@ -94,27 +104,32 @@ func (mg *Team) GetProviderConfigReference() *runtimev1alpha1.Reference {
 GetProviderReference of this Team.
 Deprecated: Use GetProviderConfigReference.
 */
-func (mg *Team) GetProviderReference() *runtimev1alpha1.Reference {
+func (mg *Team) GetProviderReference() *xpv1.Reference {
 	return mg.Spec.ProviderReference
 }
 
+// GetPublishConnectionDetailsTo of this Team.
+func (mg *Team) GetPublishConnectionDetailsTo() *xpv1.PublishConnectionDetailsTo {
+	return mg.Spec.PublishConnectionDetailsTo
+}
+
 // GetWriteConnectionSecretToReference of this Team.
-func (mg *Team) GetWriteConnectionSecretToReference() *runtimev1alpha1.SecretReference {
+func (mg *Team) GetWriteConnectionSecretToReference() *xpv1.SecretReference {
 	return mg.Spec.WriteConnectionSecretToReference
 }
 
 // SetConditions of this Team.
-func (mg *Team) SetConditions(c ...runtimev1alpha1.Condition) {
+func (mg *Team) SetConditions(c ...xpv1.Condition) {
 	mg.Status.SetConditions(c...)
 }
 
 // SetDeletionPolicy of this Team.
-func (mg *Team) SetDeletionPolicy(r runtimev1alpha1.DeletionPolicy) {
+func (mg *Team) SetDeletionPolicy(r xpv1.DeletionPolicy) {
 	mg.Spec.DeletionPolicy = r
 }
 
 // SetProviderConfigReference of this Team.
-func (mg *Team) SetProviderConfigReference(r *runtimev1alpha1.Reference) {
+func (mg *Team) SetProviderConfigReference(r *xpv1.Reference) {
 	mg.Spec.ProviderConfigReference = r
 }
 
@@ -122,11 +137,16 @@ func (mg *Team) SetProviderConfigReference(r *runtimev1alpha1.Reference) {
 SetProviderReference of this Team.
 Deprecated: Use SetProviderConfigReference.
 */
-func (mg *Team) SetProviderReference(r *runtimev1alpha1.Reference) {
+func (mg *Team) SetProviderReference(r *xpv1.Reference) {
 	mg.Spec.ProviderReference = r
 }
 
+// SetPublishConnectionDetailsTo of this Team.
+func (mg *Team) SetPublishConnectionDetailsTo(r *xpv1.PublishConnectionDetailsTo) {
+	mg.Spec.PublishConnectionDetailsTo = r
+}
+
 // SetWriteConnectionSecretToReference of this Team.
-func (mg *Team) SetWriteConnectionSecretToReference(r *runtimev1alpha1.SecretReference) {
+func (mg *Team) SetWriteConnectionSecretToReference(r *xpv1.SecretReference) {
 	mg.Spec.WriteConnectionSecretToReference = r
 }

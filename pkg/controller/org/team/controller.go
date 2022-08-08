@@ -14,16 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package org
+package team
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/google/go-github/v32/github"
+	"github.com/google/go-github/v45/github"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -39,17 +37,12 @@ import (
 )
 
 const (
-	errNotMyType    = "managed resource is not a MyType custom resource"
-	errTrackPCUsage = "cannot track ProviderConfig usage"
-	errGetPC        = "cannot get ProviderConfig"
-	errNoSecretRef  = "ProviderConfig does not reference a credentials Secret"
-	errGetSecret    = "cannot get credentials Secret"
-
-	errNewClient = "cannot create new Service"
+	errNotTeam       = "managed resource is not a Team custom resource"
+	errCreateService = "failed to create client service"
 )
 
 // Setup adds a controller that reconciles MyType managed resources.
-func Setup(mgr ctrl.Manager, l logging.Logger) error {
+func SetupTeam(mgr ctrl.Manager, l logging.Logger) error {
 	name := managed.ControllerName(v1alpha1.TeamGroupKind)
 
 	r := managed.NewReconciler(mgr,
@@ -79,38 +72,14 @@ type connector struct {
 // 3. Getting the ProviderConfig's credentials secret.
 // 4. Using the credentials secret to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	cr, ok := mg.(*v1alpha1.Team)
+	_, ok := mg.(*v1alpha1.Team)
 	if !ok {
-		return nil, errors.New(errNotMyType)
+		return nil, errors.New(errNotTeam)
 	}
-
-	if err := c.usage.Track(ctx, mg); err != nil {
-		return nil, errors.Wrap(err, errTrackPCUsage)
-	}
-
-	pc := &apisv1alpha1.ProviderConfig{}
-	if err := c.kube.Get(ctx, types.NamespacedName{Name: cr.GetProviderConfigReference().Name}, pc); err != nil {
-		return nil, errors.Wrap(err, errGetPC)
-	}
-
-	// A secret is the most common way to authenticate to a provider, but some
-	// providers additionally support alternative authentication methods such as
-	// IAM, so a reference is not required.
-	ref := pc.Spec.Credentials.SecretRef
-	if ref == nil {
-		return nil, errors.New(errNoSecretRef)
-	}
-
-	s := &v1.Secret{}
-	if err := c.kube.Get(ctx, types.NamespacedName{Namespace: ref.Namespace, Name: ref.Name}, s); err != nil {
-		return nil, errors.Wrap(err, errGetSecret)
-	}
-
-	svc, err := kcgitclient.NewClient(string(s.Data[ref.Key]))
+	svc, err := kcgitclient.UseProviderConfig(ctx, c.kube, mg)
 	if err != nil {
-		return nil, errors.Wrap(err, errNewClient)
+		return nil, errors.Wrap(err, errCreateService)
 	}
-
 	return &external{service: svc}, nil
 }
 
@@ -125,7 +94,7 @@ type external struct {
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
 	cr, ok := mg.(*v1alpha1.Team)
 	if !ok {
-		return managed.ExternalObservation{}, errors.New(errNotMyType)
+		return managed.ExternalObservation{}, errors.New(errNotTeam)
 	}
 
 	team, _, err := c.service.Teams.GetTeamBySlug(ctx, cr.Spec.ForProvider.Org, meta.GetExternalName(cr))
@@ -168,7 +137,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
 	cr, ok := mg.(*v1alpha1.Team)
 	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNotMyType)
+		return managed.ExternalCreation{}, errors.New(errNotTeam)
 	}
 
 	fmt.Printf("Creating: %+v", cr)
@@ -185,7 +154,7 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
 	cr, ok := mg.(*v1alpha1.Team)
 	if !ok {
-		return managed.ExternalUpdate{}, errors.New(errNotMyType)
+		return managed.ExternalUpdate{}, errors.New(errNotTeam)
 	}
 
 	fmt.Printf("Updating: %+v", cr)
@@ -202,7 +171,7 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
 	cr, ok := mg.(*v1alpha1.Team)
 	if !ok {
-		return errors.New(errNotMyType)
+		return errors.New(errNotTeam)
 	}
 
 	fmt.Printf("Deleting: %+v", cr)

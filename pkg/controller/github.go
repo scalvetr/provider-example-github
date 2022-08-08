@@ -22,7 +22,8 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
 	"github.com/hasheddan/kc-provider-github/pkg/controller/config"
-	"github.com/hasheddan/kc-provider-github/pkg/controller/org"
+	"github.com/hasheddan/kc-provider-github/pkg/controller/org/membership"
+	"github.com/hasheddan/kc-provider-github/pkg/controller/org/team"
 )
 
 // Setup creates all Template controllers with the supplied logger and adds them to
@@ -30,8 +31,8 @@ import (
 func Setup(mgr ctrl.Manager, l logging.Logger) error {
 	for _, setup := range []func(ctrl.Manager, logging.Logger) error{
 		config.Setup,
-		org.Setup,
-		org.SetupM,
+		membership.SetupMembership,
+		team.SetupTeam,
 	} {
 		if err := setup(mgr, l); err != nil {
 			return err
