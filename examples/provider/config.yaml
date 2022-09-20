@@ -10,7 +10,7 @@ metadata:
   name: example-provider-secret
 type: Opaque
 stringData:
-  credentials: # Add your credentials here
+  credentials: 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
 ---
 apiVersion: github.hasheddan.io/v1alpha1
 kind: ProviderConfig

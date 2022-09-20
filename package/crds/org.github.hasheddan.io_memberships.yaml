@@ -55,16 +55,14 @@ spec:
                 description: MembershipParameters are the configurable fields of a
                   Membership.
                 properties:
-                  org:
-                    description: The name of the organization to which the user should
-                      be added.
+                  organization:
                     type: string
                   team:
                     description: Team is the name of the team to which the user should
                       be added.
                     type: string
                   teamRef:
-                    description: TeamRef referes to a Team resource.
+                    description: A Reference to a named object.
                     properties:
                       name:
                         description: Name of the referenced object.
@@ -98,7 +96,7 @@ spec:
                     - name
                     type: object
                   teamSelector:
-                    description: TeamSelector selects one Team resource.
+                    description: A Selector selects an object.
                     properties:
                       matchControllerRef:
                         description: MatchControllerRef ensures an object with the
@@ -137,10 +135,9 @@ spec:
                         type: object
                     type: object
                   user:
-                    description: The name of the used to be granted membership.
                     type: string
                 required:
-                - org
+                - organization
                 - user
                 type: object
               providerConfigRef:

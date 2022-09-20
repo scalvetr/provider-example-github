@@ -3,10 +3,13 @@ kind: Membership
 metadata:
   name: example-membership
 spec:
+  writeConnectionSecretToRef:
+    name: example-membership-secret
+    namespace: default
   forProvider:
-    org: # org name
+    organization: scalvetr-crossplane-training
     teamRef:
       name: example-team
-    user: # user
+    user: maximilianblatt-at-accenture
   providerConfigRef:
     name: default

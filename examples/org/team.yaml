@@ -4,8 +4,8 @@ metadata:
   name: example-team
 spec:
   forProvider:
-    org: # org name
+    organization: scalvetr-crossplane-training
     description: "some other description"
-    privacy: secret
+    #privacy: secret
   providerConfigRef:
     name: default

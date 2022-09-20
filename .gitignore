@@ -4,3 +4,4 @@
 .vscode
 
 /secrets
+/apis/org/v1alpha1/zz_*.go

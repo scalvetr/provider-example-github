@@ -14,12 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package team
+package membership
 
 import (
 	"context"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-github/v45/github"
 	"github.com/pkg/errors"
 	"k8s.io/utils/pointer"
@@ -28,7 +27,6 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
-	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
@@ -38,20 +36,20 @@ import (
 )
 
 const (
-	errNotTeam       = "managed resource is not a Team custom resource"
-	errCreateService = "failed to create client service"
-	errGetTeam       = "Failed to get team"
-	errCreateTeam    = "Failed to create team"
-	errUpdateTeam    = "Failed to update team"
-	errDeleteTeam    = "Failed to delete team"
+	errNotMembership    = "managed resource is not a Membership custom resource"
+	errCreateService    = "failed to create client service"
+	errGetMembership    = "Failed to get membership"
+	errCreateMembership = "Failed to create membership"
+	errUpdateMembership = "Failed to update membership"
+	errDeleteMembership = "Failed to delete membership"
 )
 
 // Setup adds a controller that reconciles MyType managed resources.
-func SetupTeam(mgr ctrl.Manager, l logging.Logger) error {
-	name := managed.ControllerName(v1alpha1.TeamGroupKind)
+func SetupMembership(mgr ctrl.Manager, l logging.Logger) error {
+	name := managed.ControllerName(v1alpha1.MembershipGroupKind)
 
 	r := managed.NewReconciler(mgr,
-		resource.ManagedKind(v1alpha1.TeamGroupVersionKind),
+		resource.ManagedKind(v1alpha1.MembershipGroupVersionKind),
 		managed.WithExternalConnecter(&connector{
 			kube:  mgr.GetClient(),
 			usage: resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{})}),
@@ -62,7 +60,7 @@ func SetupTeam(mgr ctrl.Manager, l logging.Logger) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
-		For(&v1alpha1.Team{}).
+		For(&v1alpha1.Membership{}).
 		Complete(r)
 }
 
@@ -79,9 +77,9 @@ type connector struct {
 // 3. Getting the ProviderConfig's credentials secret.
 // 4. Using the credentials secret to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	_, ok := mg.(*v1alpha1.Team)
+	_, ok := mg.(*v1alpha1.Membership)
 	if !ok {
-		return nil, errors.New(errNotTeam)
+		return nil, errors.New(errNotMembership)
 	}
 	svc, err := kcgitclient.UseProviderConfig(ctx, c.kube, mg)
 
@@ -100,32 +98,39 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*v1alpha1.Team)
+	cr, ok := mg.(*v1alpha1.Membership)
 	if !ok {
-		return managed.ExternalObservation{}, errors.New(errNotTeam)
+		return managed.ExternalObservation{}, errors.New(errNotMembership)
 	}
 
-	team, _, err := c.service.Teams.GetTeamBySlug(
+	membership, _, err := c.service.Teams.GetTeamMembershipBySlug(
 		ctx,
 		cr.Spec.ForProvider.Organization,
-		meta.GetExternalName(cr))
+		*cr.Spec.ForProvider.Team,
+		cr.Spec.ForProvider.User)
 
 	if err != nil {
-		return managed.ExternalObservation{ResourceExists: false}, errors.Wrap(resource.Ignore(isNotFound, err), errGetTeam)
+		return managed.ExternalObservation{ResourceExists: false}, errors.Wrap(resource.Ignore(isNotFound, err), errGetMembership)
 	}
 
-	previousSpec := cr.Spec.ForProvider.DeepCopy()
-	cr.Spec.ForProvider = lateInitialize(cr.Spec.ForProvider, team)
-	isLateInitialized := cmp.Equal(previousSpec, cr.Spec.ForProvider)
-	isUpToDate := isUpToDate(cr.Spec.ForProvider, team)
-
-	cr.Status.SetConditions(xpv1.Available())
-	cr.Status.AtProvider.MembersCount = team.MembersCount
+	cr.Status.AtProvider.State = membership.State
+	switch pointer.StringDeref(cr.Status.AtProvider.State, "") {
+	case "active":
+		cr.Status.SetConditions(xpv1.Available())
+	case "pending":
+		cr.Status.SetConditions(xpv1.Creating())
+	default:
+		cr.Status.SetConditions(xpv1.Unavailable())
+	}
 
 	return managed.ExternalObservation{
-		ResourceExists:          true,
-		ResourceUpToDate:        isUpToDate,
-		ResourceLateInitialized: isLateInitialized,
+		ResourceExists:   true,
+		ResourceUpToDate: true,
+		ConnectionDetails: managed.ConnectionDetails{
+			"user":         []byte(cr.Spec.ForProvider.User),
+			"organization": []byte(cr.Spec.ForProvider.Organization),
+			"team":         []byte(*cr.Spec.ForProvider.Team),
+		},
 	}, nil
 
 	// can be changed in kubernetes
@@ -138,25 +143,6 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	// description is late initilized
 }
 
-func isUpToDate(spec v1alpha1.TeamParameters, current *github.Team) bool {
-	if current == nil {
-		return false
-	}
-	if pointer.StringDeref(spec.Description, "") != pointer.StringDeref(current.Description, "") {
-		return false
-	}
-	return true
-}
-
-func lateInitialize(spec v1alpha1.TeamParameters, current *github.Team) v1alpha1.TeamParameters {
-	if current != nil {
-		if spec.Description == nil {
-			spec.Description = current.Description
-		}
-	}
-	return spec
-}
-
 func isNotFound(err error) bool {
 	// err == HTTP 404 ?
 	e, ok := err.(*github.ErrorResponse)
@@ -167,40 +153,32 @@ func isNotFound(err error) bool {
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.Team)
+	cr, ok := mg.(*v1alpha1.Membership)
 	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNotTeam)
+		return managed.ExternalCreation{}, errors.New(errNotMembership)
 	}
-	_, _, err := c.service.Teams.CreateTeam(ctx, cr.Spec.ForProvider.Organization, github.NewTeam{
-		Name:        meta.GetExternalName(cr),
-		Description: cr.Spec.ForProvider.Description,
-	})
-	return managed.ExternalCreation{}, errors.Wrap(err, errCreateTeam)
+	_, _, err := c.service.Teams.AddTeamMembershipBySlug(ctx,
+		cr.Spec.ForProvider.Organization,
+		*cr.Spec.ForProvider.Team,
+		cr.Spec.ForProvider.User,
+		&github.TeamAddTeamMembershipOptions{})
+
+	return managed.ExternalCreation{}, errors.Wrap(err, errCreateMembership)
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.Team)
-	if !ok {
-		return managed.ExternalUpdate{}, errors.New(errNotTeam)
-	}
-	_, _, err := c.service.Teams.EditTeamBySlug(
-		ctx,
-		meta.GetExternalName(cr),
-		cr.Spec.ForProvider.Organization, github.NewTeam{
-			Name:        meta.GetExternalName(cr),
-			Description: cr.Spec.ForProvider.Description,
-		}, false)
-	return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateTeam)
+	return managed.ExternalUpdate{}, nil
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
-	cr, ok := mg.(*v1alpha1.Team)
+	cr, ok := mg.(*v1alpha1.Membership)
 	if !ok {
-		return errors.New(errNotTeam)
+		return errors.New(errNotMembership)
 	}
-	_, err := c.service.Teams.DeleteTeamBySlug(
-		ctx,
+	_, err := c.service.Teams.RemoveTeamMembershipBySlug(ctx,
 		cr.Spec.ForProvider.Organization,
-		meta.GetExternalName(cr))
-	return errors.Wrap(err, errDeleteTeam)
+		*cr.Spec.ForProvider.Team,
+		cr.Spec.ForProvider.User,
+	)
+	return errors.Wrap(err, errDeleteMembership)
 }

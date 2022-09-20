@@ -26,12 +26,13 @@ import (
 
 // TeamParameters are the configurable fields of a Team.
 type TeamParameters struct {
-	// TODO
+	Organization string  `json:"organization"`
+	Description  *string `json:"description,omitempty"`
 }
 
 // TeamObservation are the observable fields of a Team.
 type TeamObservation struct {
-	// TODO
+	MembersCount *int `json:"membersCount,omitempty"`
 }
 
 // A TeamSpec defines the desired state of a Team.

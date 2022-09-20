@@ -55,19 +55,11 @@ spec:
                 description: TeamParameters are the configurable fields of a Team.
                 properties:
                   description:
-                    description: A description about the team.
                     type: string
-                  org:
-                    description: The name of the organization this team belongs to.
-                    type: string
-                  privacy:
-                    description: The visibility of the team.
-                    enum:
-                    - secret
-                    - closed
+                  organization:
                     type: string
                 required:
-                - org
+                - organization
                 type: object
               providerConfigRef:
                 default:
@@ -246,8 +238,8 @@ spec:
               atProvider:
                 description: TeamObservation are the observable fields of a Team.
                 properties:
-                  nodeId:
-                    type: string
+                  membersCount:
+                    type: integer
                 type: object
               conditions:
                 description: Conditions of the resource.
